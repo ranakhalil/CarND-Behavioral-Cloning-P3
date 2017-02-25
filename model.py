@@ -118,6 +118,7 @@ print('Image Shape : ', img_shape)
 
 model = Sequential()
 model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=img_shape))
+#model.add(Cropping2D(cropping=((50, 20), (0, 0)), input_shape=img_shape))
 model.add(Convolution2D(24, 5, 5,border_mode='valid', activation='elu', subsample=(2,2)))
 model.add(Convolution2D(36, 5, 5, border_mode='valid', activation='elu', subsample=(2,2)))
 model.add(Convolution2D(48, 5, 5, border_mode='valid', activation='elu', subsample=(2,2)))
@@ -157,3 +158,4 @@ plt.show()
 
 # with open('model.json','w') as f:
 #     json.dump(model.to_json(),f,ensure_ascii=False)
+
