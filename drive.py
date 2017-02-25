@@ -11,7 +11,8 @@ import eventlet.wsgi
 from PIL import Image
 from flask import Flask
 from io import BytesIO
-
+from scipy.misc.pilutil import imresize
+from keras.preprocessing.image import img_to_array
 from keras.models import load_model
 import h5py
 from keras import __version__ as keras_version
@@ -21,6 +22,10 @@ app = Flask(__name__)
 model = None
 prev_image_array = None
 
+def resize_image(image):
+    cropped_image = image[32:135, :]
+    resized_image = imresize(cropped_image, .80, interp='bilinear', mode=None)
+    return img_to_array(resized_image)
 
 class SimplePIController:
     def __init__(self, Kp, Ki):
@@ -60,7 +65,7 @@ def telemetry(sid, data):
         # The current image from the center camera of the car
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
-        image_array = np.asarray(image)
+        image_array = resize_image(np.asarray(image))
         steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
 
         throttle = controller.update(float(speed))
