@@ -554,7 +554,7 @@ As we can see most of the model is baised towards left turns due to how the trac
 
 Rotating and translating the image is another method to make the model aware of different perspectives and povs where the car sees the road and performs the different steerings:
 
-![Translate images](https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/zero_steering.png)
+![Translate images](https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/translate.png)
 
 4. Cropping:
 
