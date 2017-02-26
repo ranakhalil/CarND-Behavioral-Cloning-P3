@@ -57,7 +57,7 @@ Model.py:
         
     Here are the code snippets:
 
-    ````
+    ```
     def resize_image(image):
     shape = image.shape
     image = image[math.floor(shape[0]/4):shape[0]-13, 0:shape[1]]
@@ -101,12 +101,12 @@ def flip_values(x, y):
         augmented_images.append(flipped_image)
         augmented_steering_angles.append(flipped_streering_angle)
     return augmented_images, augmented_steering_angles
-    ````
+    ```
     
 
     Then after feedback I added a function for image brightness, and refactored flip_images:
 
-    ````
+    ```
     def change_brightness(image):
     change_pct = random.uniform(0.5, 1.5)
     hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
@@ -127,12 +127,12 @@ def flip_values(x, y):
         augmented_steering_angles.append(flipped_streering_angle)
     return augmented_images, augmented_steering_angles
 
-    ````
+    ```
 
     ### Model Architecture and Training Strategy
 Here is an overview summary of my final model:
 
-````
+```
 Image Shape :  (50, 100, 3)
 ____________________________________________________________________________________________________
 Layer (type)                     Output Shape          Param #     Connected to
@@ -165,7 +165,7 @@ Total params: 321,087
 Trainable params: 320,987
 Non-trainable params: 100
 ____________________________________________________________________________________________________
-````
+```
 
 #### 1. An appropriate model architecture has been employed
 
@@ -174,12 +174,12 @@ in addition to five dense layers.
 
 Convolutional neural networks are great for training on images, as the stanford image processing course site metioned:
 
-````
+```
  ConvNet architectures make the explicit assumption that the inputs are images, which allows us to encode certain properties
   into the architecture. These then make the forward function more efficient to implement and vastly reduce
   the amount of parameters in the network.
 
-````
+```
 
 Convolutional neural networs are perfect as well to take an image with a lot of complex features and then distilling it
 to simpler features, which is the perfect case for our problem here.
@@ -200,7 +200,7 @@ model.add(BatchNormalization(epsilon=0.001,mode=2, axis=1,input_shape=img_shape)
 Here are example of the activation functions:
 
 On the dense layers used relu and on the final layer used tanh:
-````
+```
 model.add(Dense(1164, activation='relu'))
 model.add(Dense(100, activation='relu'))
 model.add(Dense(50, activation='relu'))
@@ -213,7 +213,7 @@ model.add(Dense(1, activation='tanh'))
 The model contains dropout layers in order to reduce overfitting. I have initially experimented with multiple dropout layers
 like the old version of my model here:
 
-````
+```
 model = Sequential()
 model.add(Lambda(lambda x: x/255.0 - 0.5, input_shape=img_shape))
 model.add(Convolution2D(3, 1, 1, border_mode='same', name='color_conv'))
@@ -242,7 +242,7 @@ model.add(Dropout(0.2))
 model.add(ELU())
 model.add(ELU())
 model.add(Dense(1))
-````
+```
 However I got really bad results with my car crashing early on, so I reduced the number of dropout layers to a single layer after the first fully connected layer.
 
 The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
@@ -250,10 +250,10 @@ The model was trained and validated on different data sets to ensure that the mo
 #### 3. Model parameter tuning
 
 The model used an adam optimizer, so the learning rate was not tuned manually as follows:
-````
+```
 adam = Adam(lr=0.0001)
 model.compile(loss='mse', optimizer=adam, metrics=['mse', 'accuracy'])
-````
+```
 I have also gathered metrics for accuracy and loss, and utilized mean square error to measure loss. I have also experimented with other optimizers, however stuck with the adam optimizer since it provided better results
 
 #### 4. Appropriate training data
@@ -261,15 +261,16 @@ I have also gathered metrics for accuracy and loss, and utilized mean square err
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center , right and left images with generated steering angles. Also thanks to Annie Flippo, she provided me with some recovery data to be able to train my car to recover from crashing on the sides of the road recovering from the left and right sides of the road ...
 
 i have also split my data into training and validation:
-````
+
+```
 X_train, X_val, y_train, y_val = train_test_split(final_images, final_steering_angles,  test_size=0.2, random_state=1)
-````
+```
 and made sure it is done randomly.
 
 Due to the high volume of data compared to how much computing power I have, I have then used fit_generator to feed the model
 the data in batches:
 
-````
+```
 
 def generator(images, steering_angles, batch_size=32):
     num_samples = len(images)
@@ -281,7 +282,7 @@ def generator(images, steering_angles, batch_size=32):
             x = np.array(batch_images)
             y = np.array(batch_steering_angles)
             yield shuffle(x, y, random_state=0)
-````
+```
 
 For details about how I created the training data, see the next section.
 
@@ -308,7 +309,7 @@ The final step was to run the simulator to see how well the car was driving arou
 
 The final model architecture consisted of a convolution neural network with five convolutional layers and five dense layers:
 
-````
+```
 model = Sequential()
 model.add(BatchNormalization(epsilon=0.001,mode=2, axis=1,input_shape=img_shape))
 model.add(Convolution2D(24,5,5,border_mode='valid', activation='relu', subsample=(2,2)))
@@ -333,7 +334,7 @@ model.summary()
 
 After a series of failure while utilizing dropouts, I went back to the original NVIDIA model and collected more data, here is the final model:
 
-````
+```
 model = Sequential()
 model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=img_shape))
 model.add(Convolution2D(24, 5, 5,border_mode='valid', activation='elu', subsample=(2,2)))
@@ -350,17 +351,21 @@ adam = Adam(lr=0.0001)
 model.compile(loss='mse', optimizer=adam, metrics=['mse', 'accuracy'])
 
 model.summary()
-````
+```
 
 # checkpoint
+```
 checkpoint = ModelCheckpoint("model-{epoch:02d}.h5", monitor='loss', verbose=1, save_best_only=False, mode='max')
+```
 
 # fit the model
+```
 model.fit_generator(train_generator, samples_per_epoch=len(X_train), nb_epoch=25, validation_data=validation_generator, nb_val_samples=len(X_val), callbacks=[checkpoint])
-````
+```
 
 Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
-````
+
+```
 Loaded Images!!
 Image Shape :  (50, 100, 3)
 ____________________________________________________________________________________________________
@@ -401,11 +406,11 @@ Trainable params: 135,327
 Non-trainable params: 100
 ____________________________________________________________________________________________________
 
-````
+```
 
 After the revised section, here is how the model summary looks like:
 
-````
+```
 Read CSV Lines :  18008
 Number of Images in recorded set :  54024
 Loaded Images!!
@@ -439,7 +444,7 @@ Total params: 879,419
 Trainable params: 879,419
 Non-trainable params: 0
 ____________________________________________________________________________________________________
-````
+```
 
 #### 3. Creation of the Training Set & Training Process
 
@@ -464,7 +469,7 @@ Please refer to [Visualization Notebook ](https://github.com/ranakhalil/behavior
 
 #### 5. Model Accuracy:
 
-````
+```
 Epoch 1/25
 22400/22519 [============================>.] - ETA: 0s - loss: 0.0330 - mean_squared_error: 0.0330 - acc: 0.1817/home/Jake/anaconda3/lib/python3.5/site-packages/keras/engine/training.py:1573: UserWarning: Epoch comprised more than `samples_per_epoch` samples, which might affect learning results. Set `samples_per_epoch` correctly to avoid this warning.
   warnings.warn('Epoch comprised more than '
@@ -518,7 +523,7 @@ Epoch 24/25
 Epoch 25/25
 22400/22519 [============================>.] - ETA: 0s - loss: 0.0105 - mean_squared_error: 0.0105 - acc: 0.1854Epoch 0022528/22519 [==============================] - 92s - loss: 0.0105 - mean_squared_error: 0.0105 - acc: 0.1855 - val_loss: 0.0160 - val_mean_squared_error: 0.0160 - val_acc: 0.1944
 Saving Model Weights!!
-````
+```
 
 As you can see the mean squared error is reducting and accuracy is increasing .. Great sign!!
 
