@@ -57,7 +57,7 @@ Model.py:
         
     Here are the code snippets:
 
-    ```
+    ````
     def resize_image(image):
     shape = image.shape
     image = image[math.floor(shape[0]/4):shape[0]-13, 0:shape[1]]
@@ -102,6 +102,7 @@ def flip_values(x, y):
         augmented_steering_angles.append(flipped_streering_angle)
     return augmented_images, augmented_steering_angles
     ````
+    
 
     Then after feedback I added a function for image brightness, and refactored flip_images:
 
@@ -326,6 +327,7 @@ adam = Adam(lr=0.0001)
 model.compile(loss='mse', optimizer=adam, metrics=['mse', 'accuracy'])
 
 model.summary()
+```
 
 **REVISED:**
 
@@ -397,7 +399,9 @@ dense_4 (Dense)                  (None, 1)             11          dropout_4[0][
 Total params: 135,427
 Trainable params: 135,327
 Non-trainable params: 100
-____________________________________________________________________________________________________````
+____________________________________________________________________________________________________
+
+````
 
 After the revised section, here is how the model summary looks like:
 
