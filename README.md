@@ -485,7 +485,7 @@ I have tried a variety of visualization tools, to be able to analyze the data. H
 
 Initially I wanted to take a look at the data and see what the driving log csv file contains:
 
-![Rows from log csv][https://raw.githubusercontent.com/ranakhalil/CarND-Behavioral-Cloning-P3/master/visualization/vis_1.png]
+![Rows from log csv][vis_1.png]
 
 As you can see from the image I was able to identify I have the correct images for right, left and center along with the steering angle data and throttle. After looking at what the data looks like, it was time for some graphing tools.
 
@@ -501,17 +501,17 @@ steering_left = steering_center + correction
 steering_right = steering_center - correction
 ```
 Now here is how that looks like in printed values:
-![Right, left and center images with steering angles][https://raw.githubusercontent.com/ranakhalil/CarND-Behavioral-Cloning-P3/master/visualization/vis_2.png]
+![Right, left and center images with steering angles](https://raw.githubusercontent.com/ranakhalil/CarND-Behavioral-Cloning-P3/master/visualization/vis_2.png)
 
 After that, it was time to take a look at the data from a hollistic point of view. 
 
 I decided to plot a histogram thanks to help from Vivek Yadav, Annie Flippo and Nick Hortvanyi I learnt how to take a look at 
 the steering angles in my data:
-![Steering angles histogram][https://raw.githubusercontent.com/ranakhalil/CarND-Behavioral-Cloning-P3/master/visualization/vis_3.png]
+![Steering angles histogram](https://raw.githubusercontent.com/ranakhalil/CarND-Behavioral-Cloning-P3/master/visualization/vis_3.png)
 
 As you could see I have a lot of zero angled data, so my initial thought while training my model was how would that data look like if I attempted to take out a percentage of the zero angled data. Here is my histogram after taking 65% of the zero angled data out:
 
-![Right, left and center images with steering angles][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/zero_steering.png]
+![Right, left and center images with steering angles](https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/zero_steering.png)
 
 While the volume of zero angles improved a bit my model still had more zero angles, and thats mainly due to the fact that yes even though we have some left and right turns, most of our driving time is close to straight navigation. After also a couple of failed training attempts leaving all the data beared better results than removing the 65%.
 
@@ -519,19 +519,19 @@ I have also experimented with dropouts, ranging from 0.1 , 0.2 and 0.5 and resul
 
 After going through some visualization, I have seen some students attempts to analyze the range of the steering angles, so I used describe function in pandas to get some statistics on my steering data as well beside plotting them:
 
-![Stats for steering angles][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/vis_4.png]
+![Stats for steering angles](https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/vis_4.png)
 
 As you could see our data does indeed range from -1.0 to 1.0, however our max reached 0.95 and not 1.0 so thats interesting in terms of our steering accuracy and data. 
 
 The next step to me was well, yes I know I have a lot of zero angled data, but what does the rest of my data look like for angles that aren't zero:
 
-![Stats for steering angles][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/vis_5.png]
+![Stats for steering angles](https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/vis_5.png)
 
 From the histogram shown, an expected result emerged, wait I have more left turns that right turns. The explanation is simple, the first track has more left turns than right turns, so its just natural for our data to contain more steering information to the left than to the right. That obviously echoes a relief that our data is indeed representative of the training.
 
 Now I really thought its time to take a step back , and take a look at another parameter. Say our speed:
 
-![Stats for speed][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/vis_6.png]
+![Stats for speed](https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/vis_6.png)
 
 As we could see and since I collected the data I know thats true as well my speed ranged from 18 to 30. Overall I was driving around 30.
 
@@ -542,25 +542,25 @@ Now the next step was, what can we do with the images to augment and translate..
 Using the HSV color space, played with some random brightness for my images to generate more data and tech my model
 how to drive at different parts of the day. Here are how my images looked like some random brightness:
 
-![random brightness][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/random_brightness.png]
+![random brightness](https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/random_brightness.png)
 
 2. Flipping the images:
 
 As we can see most of the model is baised towards left turns due to how the track is designed, we can compensate for that through flipping images and steering angle values:
 
-![flipped images][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/flipped.png]
+![flipped images](https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/flipped.png)
 
 3. Translation:
 
 Rotating and translating the image is another method to make the model aware of different perspectives and povs where the car sees the road and performs the different steerings:
 
-![Translate images][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/zero_steering.png]
+![Translate images](https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/zero_steering.png)
 
 4. Cropping:
 
 Not all parts of the image are useful to how the car visualizes the road and steers, for example the portion of the image with the hood of the car could be removed and cropped thus making the image size smaller and making the network more efficient in learning how to steer:
 
-![Cropping images][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/cropping_vis.png]
+![Cropping images](https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/cropping_vis.png)
 
 
 #### 5. Model Accuracy:
