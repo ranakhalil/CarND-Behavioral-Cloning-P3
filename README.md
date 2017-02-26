@@ -256,6 +256,9 @@ model.compile(loss='mse', optimizer=adam, metrics=['mse', 'accuracy'])
 ```
 I have also gathered metrics for accuracy and loss, and utilized mean square error to measure loss. I have also experimented with other optimizers, however stuck with the adam optimizer since it provided better results
 
+Part of my experimentation I have considered making my own custom loss function , however while feeding the model to drive.py I have
+encountered some issues re passing the custom loss function. 
+
 #### 4. Appropriate training data
 
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center , right and left images with generated steering angles. Also thanks to Annie Flippo, she provided me with some recovery data to be able to train my car to recover from crashing on the sides of the road recovering from the left and right sides of the road ...
@@ -278,7 +281,6 @@ def generator(images, steering_angles, batch_size=32):
         for offset in range(0, num_samples, batch_size):
             batch_images = images[offset:offset + batch_size]
             batch_steering_angles = steering_angles[offset:offset + batch_size]
-            # trim image to only see section with road
             x = np.array(batch_images)
             y = np.array(batch_steering_angles)
             yield shuffle(x, y, random_state=0)
@@ -467,8 +469,103 @@ In my revised version, I ended up collecting more data especially recovery data 
 
 Please refer to [Visualization Notebook ](https://github.com/ranakhalil/behavior-cloning/blob/master/P3%20-%20Behavioral%20Cloning%20Visualization%20and%20PreProcessing%20for%20final%20writeup.ipynb)
 
+After struggling with the udacity data, I have decided to re-record my own data resulting in a data set of the following size:
+
+```
+Using TensorFlow backend.
+Read CSV Lines :  18008
+Number of Images in recorded set :  54024
+Loaded Images!!
+Image Shape :  (92, 288, 3)
+```
+
+As you could see I had 18, 008 lines and 54, 024 images after preprocessing, flipping and augmenting the images.
+
+I have tried a variety of visualization tools, to be able to analyze the data. Here is a brief discussion of some:
+
+Initially I wanted to take a look at the data and see what the driving log csv file contains:
+
+![Rows from log csv][https://raw.githubusercontent.com/ranakhalil/CarND-Behavioral-Cloning-P3/master/visualization/vis_1.png]
+
+As you can see from the image I was able to identify I have the correct images for right, left and center along with the steering angle data and throttle. After looking at what the data looks like, it was time for some graphing tools.
+
+The next step was to show the right, left and center images and take a look at the corresponding steering angle for the center image.
+In my image pre-processing I have also added a correction value to generate data for the right and left images since I decided to use them in my model. 
+
+Here is the portion of the code to show you how I did that:
+
+```
+correction = 0.14  # this is a parameter to tune
+steering_center = float(driving_data['steering'][30])
+steering_left = steering_center + correction
+steering_right = steering_center - correction
+```
+Now here is how that looks like in printed values:
+![Right, left and center images with steering angles][https://raw.githubusercontent.com/ranakhalil/CarND-Behavioral-Cloning-P3/master/visualization/vis_2.png]
+
+After that, it was time to take a look at the data from a hollistic point of view. 
+
+I decided to plot a histogram thanks to help from Vivek Yadav, Annie Flippo and Nick Hortvanyi I learnt how to take a look at 
+the steering angles in my data:
+![Steering angles histogram][https://raw.githubusercontent.com/ranakhalil/CarND-Behavioral-Cloning-P3/master/visualization/vis_3.png]
+
+As you could see I have a lot of zero angled data, so my initial thought while training my model was how would that data look like if I attempted to take out a percentage of the zero angled data. Here is my histogram after taking 65% of the zero angled data out:
+
+![Right, left and center images with steering angles][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/zero_steering.png]
+
+While the volume of zero angles improved a bit my model still had more zero angles, and thats mainly due to the fact that yes even though we have some left and right turns, most of our driving time is close to straight navigation. After also a couple of failed training attempts leaving all the data beared better results than removing the 65%.
+
+I have also experimented with dropouts, ranging from 0.1 , 0.2 and 0.5 and resulted in a baised results as well. 
+
+After going through some visualization, I have seen some students attempts to analyze the range of the steering angles, so I used describe function in pandas to get some statistics on my steering data as well beside plotting them:
+
+![Stats for steering angles][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/vis_4.png]
+
+As you could see our data does indeed range from -1.0 to 1.0, however our max reached 0.95 and not 1.0 so thats interesting in terms of our steering accuracy and data. 
+
+The next step to me was well, yes I know I have a lot of zero angled data, but what does the rest of my data look like for angles that aren't zero:
+
+![Stats for steering angles][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/vis_5.png]
+
+From the histogram shown, an expected result emerged, wait I have more left turns that right turns. The explanation is simple, the first track has more left turns than right turns, so its just natural for our data to contain more steering information to the left than to the right. That obviously echoes a relief that our data is indeed representative of the training.
+
+Now I really thought its time to take a step back , and take a look at another parameter. Say our speed:
+
+![Stats for speed][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/vis_6.png]
+
+As we could see and since I collected the data I know thats true as well my speed ranged from 18 to 30. Overall I was driving around 30.
+
+Now the next step was, what can we do with the images to augment and translate... there are few things I have played around with images
+
+1. Changing the brightness of the images randomly:
+
+Using the HSV color space, played with some random brightness for my images to generate more data and tech my model
+how to drive at different parts of the day. Here are how my images looked like some random brightness:
+
+![random brightness][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/random_brightness.png]
+
+2. Flipping the images:
+
+As we can see most of the model is baised towards left turns due to how the track is designed, we can compensate for that through flipping images and steering angle values:
+
+![flipped images][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/flipped.png]
+
+3. Translation:
+
+Rotating and translating the image is another method to make the model aware of different perspectives and povs where the car sees the road and performs the different steerings:
+
+![Translate images][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/zero_steering.png]
+
+4. Cropping:
+
+Not all parts of the image are useful to how the car visualizes the road and steers, for example the portion of the image with the hood of the car could be removed and cropped thus making the image size smaller and making the network more efficient in learning how to steer:
+
+![Cropping images][https://github.com/ranakhalil/CarND-Behavioral-Cloning-P3/blob/master/visualization/cropping_vis.png]
+
+
 #### 5. Model Accuracy:
 
+This is the old model accuracy from the work I have done in the previous github repo:
 ```
 Epoch 1/25
 22400/22519 [============================>.] - ETA: 0s - loss: 0.0330 - mean_squared_error: 0.0330 - acc: 0.1817/home/Jake/anaconda3/lib/python3.5/site-packages/keras/engine/training.py:1573: UserWarning: Epoch comprised more than `samples_per_epoch` samples, which might affect learning results. Set `samples_per_epoch` correctly to avoid this warning.
@@ -524,6 +621,25 @@ Epoch 25/25
 22400/22519 [============================>.] - ETA: 0s - loss: 0.0105 - mean_squared_error: 0.0105 - acc: 0.1854Epoch 0022528/22519 [==============================] - 92s - loss: 0.0105 - mean_squared_error: 0.0105 - acc: 0.1855 - val_loss: 0.0160 - val_mean_squared_error: 0.0160 - val_acc: 0.1944
 Saving Model Weights!!
 ```
+
+Here is the recent successful model accuracy data:
+
+```
+Epoch 1/5
+43200/43219 [============================>.] - ETA: 0s - loss: 0.0340 - mean_squared_error: 0.0340 - acc: 0.1164/home/Jake/anaconda3/lib/python3.5/site-packages/keras/engine/training.py:1527: UserWarning: Epoch comprised more than `samples_per_epoch` samples, which might affect learning results. Set `samples_per_epoch` correctly to avoid this warning.
+43264/43219 [==============================] - 1224s - loss: 0.0340 - mean_squared_error: 0.0340 - acc: 0.1165 - val_loss: 0.0318 - val_mean_squared_error: 0.0318 - val_acc: 0.1110
+Epoch 2/5
+43238/43219 [==============================] - 1096s - loss: 0.0322 - mean_squared_error: 0.0322 - acc: 0.1155 - val_loss: 0.0315 - val_mean_squared_error: 0.0315 - val_acc: 0.1162
+Epoch 3/5
+43264/43219 [==============================] - 1068s - loss: 0.0313 - mean_squared_error: 0.0313 - acc: 0.1165 - val_loss: 0.0315 - val_mean_squared_error: 0.0315 - val_acc: 0.1112
+Epoch 4/5
+43238/43219 [==============================] - 1069s - loss: 0.0310 - mean_squared_error: 0.0310 - acc: 0.1156 - val_loss: 0.0307 - val_mean_squared_error: 0.0307 - val_acc: 0.1175
+Epoch 5/5
+43264/43219 [==============================] - 1071s - loss: 0.0306 - mean_squared_error: 0.0306 - acc: 0.1164 - val_loss: 0.0317 - val_mean_squared_error: 0.0317 - val_acc: 0.1093
+Saving Model Weights!!
+dict_keys(['mean_squared_error', 'loss', 'acc', 'val_mean_squared_error', 'val_acc', 'val_loss'])
+```
+
 
 As you can see the mean squared error is reducting and accuracy is increasing .. Great sign!!
 
