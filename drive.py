@@ -24,7 +24,7 @@ prev_image_array = None
 
 def resize_image(image):
     cropped_image = image[32:135, :]
-    resized_image = imresize(cropped_image, .80, interp='bilinear', mode=None)
+    resized_image = imresize(cropped_image, .90, interp='bilinear', mode=None)
     return img_to_array(resized_image)
 
 class SimplePIController:
