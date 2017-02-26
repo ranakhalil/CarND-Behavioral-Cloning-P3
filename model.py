@@ -134,7 +134,7 @@ model.compile(loss='mse', optimizer=adam, metrics=['mse', 'accuracy'])
 model.summary()
 
 # checkpoint
-checkpoint = ModelCheckpoint("model-{epoch:02d}.h5", save_weights_only=True)
+checkpoint = ModelCheckpoint("model-{epoch:02d}.h5")
 
 # fit the model
 history_object = model.fit_generator(train_generator, samples_per_epoch=len(X_train), nb_epoch=5, validation_data=validation_generator, nb_val_samples=len(X_val), callbacks=[checkpoint], verbose=1)
