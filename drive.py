@@ -120,6 +120,12 @@ if __name__ == '__main__':
     model_version = f.attrs.get('keras_version')
     keras_version = str(keras_version).encode('utf8')
 
+    print('Model Version: ', model_version)
+    print('Keras Version : ', keras_version)
+
+    # My keras version is always None, I made sure I had the right keras build and only one build .. something is off
+    # here so adding an additional check.
+
     if model_version != keras_version:
         print('You are using Keras version ', keras_version,
               ', but the model was built using ', model_version)
